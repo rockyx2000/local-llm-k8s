@@ -23,4 +23,9 @@
 - OpenAI 互換 API と Ollama API の両方が使え、Continue 拡張から直接接続できる。
 - Ollama には認証機能がない。公開範囲の制御は別途行う (ADR-0003)。
 - CPU 推論はメモリ帯域が律速になる。並列数は 1 に抑え (`OLLAMA_NUM_PARALLEL=1`)、モデルは 30 分保持する (`OLLAMA_KEEP_ALIVE`)。
-- Worker のメモリ上限 (`limits.memory: 24Gi`) は仮置き。実メモリ量の確認後に調整する。
+- 実環境の確認結果 (2026-10-18): microk8s v1.32、2ノード (`k8s-master` 10.0.1.101、`k8s-worker` 10.0.1.102)。
+  Worker は 6 vCPU、メモリ約 30GB で、ArgoCD、chat-app、PostgreSQL、ingress、MetalLB などが同居している。
+  StorageClass は `microk8s-hostpath` (既定、WaitForFirstConsumer)。MetalLB と ingress アドオンが有効。
+- 上記を踏まえ、Pod は `kubernetes.io/hostname: k8s-worker` に固定し、リソースは requests が cpu 3 / memory 8Gi、
+  limits が cpu 5 / memory 20Gi とした。他のワークロードを圧迫しないためで、推論スレッド数も 6 を超えない範囲に抑える。
+- hostpath の PVC は Worker のローカルディスク (空き約 100GB) に作られる。Worker 障害時はモデルの再取得が必要になる。
