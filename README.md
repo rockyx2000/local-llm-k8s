@@ -21,7 +21,8 @@ Makefile    よく使う操作
 make apply     # namespace / PVC / Deployment / Service を作成
 make status    # Pod が Running になるまで待つ
 make models    # k8s/models.txt のモデルを取得
-make forward   # localhost:11434 に転送 (別ターミナルで make test)
+make test      # 疎通確認 (LAN から http://10.0.1.200:11434 に接続できる)
+make forward   # (任意) 手元に一時転送したい場合
 ```
 
 VSCode の設定は `docs/vscode-continue.md` を参照。

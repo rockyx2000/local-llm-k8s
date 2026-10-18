@@ -3,6 +3,7 @@ export KUBECONFIG ?= $(HOME)/.kube/config-home
 
 NAMESPACE ?= llm
 LOCAL_PORT ?= 11434
+OLLAMA_URL ?= http://10.0.1.200:11434
 
 .PHONY: apply delete status models update-models forward test logs
 
@@ -24,8 +25,8 @@ update-models: ## 定期更新ジョブを今すぐ実行 (最新のモデルを
 forward:    ## ローカルから localhost:$(LOCAL_PORT) で接続できるようにする
 	kubectl -n $(NAMESPACE) port-forward svc/ollama $(LOCAL_PORT):11434
 
-test:       ## 疎通確認 (forward 実行中に別ターミナルで)
-	curl -s http://localhost:$(LOCAL_PORT)/api/tags
+test:       ## 疎通確認 (LoadBalancer の IP に接続)
+	curl -s $(OLLAMA_URL)/api/tags
 
 logs:       ## Ollama のログを表示
 	kubectl -n $(NAMESPACE) logs deploy/ollama -f

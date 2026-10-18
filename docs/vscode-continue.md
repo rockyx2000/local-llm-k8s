@@ -1,7 +1,10 @@
 # VSCode (Continue 拡張) から使う
 
-事前に `make forward` を実行して `localhost:11434` で接続できる状態にする。
-NodePort を使う場合は `apiBase` を `http://<ノードIP>:31434` に置き換える。
+LAN 内の端末から `http://10.0.1.200:11434` に直接接続できる (MetalLB の固定 IP、ADR-0005)。
+疎通確認は `curl http://10.0.1.200:11434/api/tags`。
+なお Ollama には認証がないため、信頼できる LAN 内に限って使う。
+
+手元から一時的に確認したいだけなら `make forward` で `localhost:11434` に転送してもよい。
 
 `~/.continue/config.yaml` の例:
 
@@ -13,12 +16,12 @@ models:
   - name: Granite 4.2 8B (local)
     provider: ollama
     model: granite4.2:8b
-    apiBase: http://localhost:11434
+    apiBase: http://10.0.1.200:11434
     roles: [chat, edit, apply]
   - name: StarCoder2 3B (local)
     provider: ollama
     model: starcoder2:3b
-    apiBase: http://localhost:11434
+    apiBase: http://10.0.1.200:11434
     roles: [autocomplete]
 ```
 
