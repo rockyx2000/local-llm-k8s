@@ -1,14 +1,20 @@
 # Ollama に取得するモデル一覧 (1行1モデル、# 始まりはコメント)
 # 2026-10 時点で ollama.com/library にあるもの。中国系モデルは含めない。
 
-# チャット / コード生成 (IBM, Apache 2.0, 約5GB)
-granite4.2:8b
+# チャット / コード生成 (品質重視、IBM, Apache 2.0, 約5GB、約6.5 tokens/s)
+granite4.1:8b
+
+# チャット (速度重視、IBM, Apache 2.0, 約2GB、約14.6 tokens/s)
+granite4:3b
 
 # コード補完 (FIM) 用の軽量モデル (BigCode)
 starcoder2:3b
 
+# 使わない (thinking が既定で有効になり、短い質問でも約2分かかるため):
+# granite4.2:8b   # IBM, 推論モデル。Continue から think を止められない (ADR-0006)
+
 # Worker のメモリに余裕がある場合に有効化する
-# gpt-oss:20b     # OpenAI, MoE, 約14GB。Worker VM を 16GiB にした現状では載らない
+# gpt-oss:20b     # OpenAI, MoE, 約14GB。メモリ制限を16Gi以上に上げる必要がある。推論モデル
 # gemma4:e4b      # Google, 軽量
 # phi4-mini       # Microsoft, 3.8B, 軽量で速い (2025年世代)
 # phi4            # Microsoft, 14B dense, 精度は高いがCPUでは遅め (2025年世代)

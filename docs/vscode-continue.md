@@ -13,12 +13,17 @@ name: local-llm
 version: 0.0.1
 schema: v1
 models:
-  - name: Granite 4.2 8B (local)
+  - name: Granite 4.1 8B (質重視)
     provider: ollama
-    model: granite4.2:8b
+    model: granite4.1:8b
     apiBase: http://10.0.1.200:11434
     roles: [chat, edit, apply]
-  - name: StarCoder2 3B (local)
+  - name: Granite 4 3B (速度重視)
+    provider: ollama
+    model: granite4:3b
+    apiBase: http://10.0.1.200:11434
+    roles: [chat, edit, apply]
+  - name: StarCoder2 3B (補完)
     provider: ollama
     model: starcoder2:3b
     apiBase: http://10.0.1.200:11434
@@ -26,6 +31,8 @@ models:
 ```
 
 ## 補足
+- チャットのモデルは Continue の画面で切り替える。普段は速い `granite4:3b`、精度が欲しいときに `granite4.1:8b` を使う。
+- `granite4.2` のような推論モデルは、Continue から thinking を止められず1回の応答に約2分かかるため使わない (ADR-0006)。
 - CPU 推論は初回のロードと長いプロンプトの処理に時間がかかる。
   補完モデルは小さく保ち、チャットに渡すコンテキストは絞る。
 - `OLLAMA_KEEP_ALIVE` により、一度ロードしたモデルは30分メモリに保持される。
