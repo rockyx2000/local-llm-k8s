@@ -49,12 +49,14 @@ spec:
           resources:
             # Worker は 6 vCPU / 約30GB で、ArgoCD・chat-app・PostgreSQL・
             # ingress などが同居している。他の Pod を飢えさせない値にする。
+            # Worker VM は 16GiB を想定 (ホストの物理メモリが 31GiB で、
+            # 30GiB 割り当てていた VM が OOM Killer に落とされたため)。
             requests:
               cpu: "3"
-              memory: 8Gi
+              memory: 6Gi
             limits:
               cpu: "5"
-              memory: 20Gi        # gpt-oss:20b (約14GB) を載せても余裕がある値
+              memory: 10Gi        # granite4.2:8b + starcoder2:3b + KV キャッシュで約9GB
           volumeMounts:
             - name: models
               mountPath: /root/.ollama

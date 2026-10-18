@@ -5,3 +5,14 @@ resources:
   - pvc.yaml
   - deployment.yaml
   - service.yaml
+  - cronjob-model-update.yaml
+
+# モデル一覧 (k8s/models.txt) を ConfigMap にして CronJob から参照する。
+# disableNameSuffixHash により名前を固定する。
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+  - name: ollama-models-list
+    namespace: llm
+    files:
+      - models.txt
