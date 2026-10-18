@@ -3,6 +3,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: ollama-models
   namespace: llm
+  annotations:
+    # ArgoCD の prune やアプリ削除でモデル保存領域が消えないようにする
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
 spec:
   accessModes: ["ReadWriteOnce"]
   # storageClassName は環境のデフォルトを使用する。

@@ -15,11 +15,10 @@ spec:
       labels:
         app: ollama
     spec:
-      # 6コア/12スレッドを割り当てた Worker に固定する場合は、
-      # ノードにラベルを付けて以下を有効化する。
-      #   kubectl label node <node名> workload=llm
-      # nodeSelector:
-      #   workload: llm
+      # master は低スペックなので Worker に固定する。
+      # hostpath の PVC も最初にスケジュールされたノードに作られる。
+      nodeSelector:
+        kubernetes.io/hostname: k8s-worker
       containers:
         - name: ollama
           image: ollama/ollama:latest
@@ -48,12 +47,14 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 30
           resources:
+            # Worker は 6 vCPU / 約30GB で、ArgoCD・chat-app・PostgreSQL・
+            # ingress などが同居している。他の Pod を飢えさせない値にする。
             requests:
-              cpu: "5"
-              memory: 12Gi
+              cpu: "3"
+              memory: 8Gi
             limits:
-              cpu: "6"
-              memory: 24Gi        # Worker の実メモリに合わせて調整する
+              cpu: "5"
+              memory: 20Gi        # gpt-oss:20b (約14GB) を載せても余裕がある値
           volumeMounts:
             - name: models
               mountPath: /root/.ollama

@@ -1,3 +1,6 @@
+# microk8s の kubeconfig (master から取得して配置したもの)
+export KUBECONFIG ?= $(HOME)/.kube/config-home
+
 NAMESPACE ?= llm
 LOCAL_PORT ?= 11434
 
