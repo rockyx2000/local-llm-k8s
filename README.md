@@ -26,6 +26,16 @@ make forward   # localhost:11434 に転送 (別ターミナルで make test)
 
 VSCode の設定は `docs/vscode-continue.md` を参照。
 
+## ArgoCD による管理
+
+`argocd/application.yaml` を初回のみ手動で適用すると、以降は `k8s/` の変更が自動で反映される。
+
+```bash
+kubectl apply -f argocd/application.yaml
+```
+
+kubeconfig は `~/.kube/config-home` (microk8s の master から取得したもの) を使う。
+
 ## 今後の予定
 - Cloudflare Tunnel による外部公開 (Cloudflare Access での認証を併用する)
 

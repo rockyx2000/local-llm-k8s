@@ -1,0 +1,35 @@
+# ArgoCD の Application 定義 (初回のみ手動で適用する)。
+#   kubectl apply -f argocd/application.yaml
+# 以降は k8s/ 配下の変更が git push だけでクラスタに反映される。
+#
+# 既存の chat-app と同じ構成に合わせている。
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: local-llm
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/rockyx2000/local-llm-k8s
+    # リポジトリの既定ブランチを追跡する。
+    # 既定ブランチが main になるまでは feature ブランチを指す点に注意。
+    targetRevision: HEAD
+    path: k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: llm
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 3
+      backoff:
+        duration: 180s
+        factor: 2
+        maxDuration: 5m0s
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+      - PrunePropagationPolicy=foreground
