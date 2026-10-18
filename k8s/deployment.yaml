@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: llm
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate   # RWO の PVC を使うためローリング更新は不可
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      # 6コア/12スレッドを割り当てた Worker に固定する場合は、
+      # ノードにラベルを付けて以下を有効化する。
+      #   kubectl label node <node名> workload=llm
+      # nodeSelector:
+      #   workload: llm
+      containers:
+        - name: ollama
+          image: ollama/ollama:latest
+          ports:
+            - name: http
+              containerPort: 11434
+          env:
+            - name: OLLAMA_HOST
+              value: "0.0.0.0:11434"
+            - name: OLLAMA_KEEP_ALIVE
+              value: "30m"        # モデルをメモリに保持して再ロードを避ける
+            - name: OLLAMA_NUM_PARALLEL
+              value: "1"          # CPU 推論では並列数を増やすと全体が遅くなる
+            - name: OLLAMA_MAX_LOADED_MODELS
+              value: "2"          # チャット用 + 補完用の同時ロードを想定
+          readinessProbe:
+            httpGet:
+              path: /api/version
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/version
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: "5"
+              memory: 12Gi
+            limits:
+              cpu: "6"
+              memory: 24Gi        # Worker の実メモリに合わせて調整する
+          volumeMounts:
+            - name: models
+              mountPath: /root/.ollama
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: ollama-models

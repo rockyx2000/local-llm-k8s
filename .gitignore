@@ -1,0 +1,6 @@
+# Secret 類をコミットしない
+*.secret.yaml
+secrets/
+.env
+.env.*
+*.token
