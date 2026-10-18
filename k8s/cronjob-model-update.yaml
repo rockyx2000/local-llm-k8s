@@ -1,0 +1,65 @@
+# k8s/models.txt に書かれたモデルを定期的に再取得して最新に保つ。
+# ollama pull はタグのダイジェストが変わっていた場合のみ差分を取得し、
+# 変わっていなければ数秒で終わる。
+#
+# 注意: タグを固定しているため (例: granite4.2:8b)、新しい世代 (granite4.3 など) への
+#       切り替えは自動では行われない。世代の更新は k8s/models.txt を編集して行う。
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: model-updater
+  namespace: llm
+spec:
+  # 毎週月曜 03:00 (JST) = 日曜 18:00 (UTC)
+  schedule: "0 18 * * 0"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 4
+      activeDeadlineSeconds: 3600
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          restartPolicy: OnFailure
+          # Ollama 本体のイメージが取得済みの Worker で動かす
+          nodeSelector:
+            kubernetes.io/hostname: k8s-worker
+          containers:
+            - name: pull
+              image: ollama/ollama:latest
+              env:
+                - name: OLLAMA_HOST
+                  value: "http://ollama.llm.svc.cluster.local:11434"
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+                  # Ollama の起動 (Pod の入れ替え中など) を最大5分待つ
+                  i=0
+                  until ollama list >/dev/null 2>&1; do
+                    i=$((i + 1))
+                    [ "$i" -ge 60 ] && { echo "Ollama に接続できない"; exit 1; }
+                    sleep 5
+                  done
+                  grep -vE '^\s*(#|$)' /config/models.txt | sed 's/\s*#.*//' | while read -r model; do
+                    echo "==> pull: ${model}"
+                    ollama pull "${model}"
+                  done
+                  echo "==> 取得済みモデル"
+                  ollama list
+              volumeMounts:
+                - name: models-list
+                  mountPath: /config
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  memory: 256Mi
+          volumes:
+            - name: models-list
+              configMap:
+                name: ollama-models-list
