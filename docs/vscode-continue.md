@@ -13,25 +13,26 @@ name: local-llm
 version: 0.0.1
 schema: v1
 models:
+  - name: LFM2.5 8B (メイン)
+    provider: ollama
+    model: lfm2.5:8b
+    apiBase: http://10.0.1.200:11434
+    roles: [chat, edit, apply]
   - name: Granite 4.1 8B (質重視)
     provider: ollama
     model: granite4.1:8b
     apiBase: http://10.0.1.200:11434
     roles: [chat, edit, apply]
-  - name: Granite 4 3B (速度重視)
+  - name: Qwen2.5-Coder 3B (補完)
     provider: ollama
-    model: granite4:3b
-    apiBase: http://10.0.1.200:11434
-    roles: [chat, edit, apply]
-  - name: StarCoder2 3B (補完)
-    provider: ollama
-    model: starcoder2:3b
+    model: qwen2.5-coder:3b
     apiBase: http://10.0.1.200:11434
     roles: [autocomplete]
 ```
 
 ## 補足
-- チャットのモデルは Continue の画面で切り替える。普段は速い `granite4:3b`、精度が欲しいときに `granite4.1:8b` を使う。
+- チャットのモデルは Continue の画面で切り替える。普段は速い `lfm2.5:8b`、精度が欲しいときに `granite4.1:8b` を使う (ADR-0007)。
+- `lfm2.5:8b` は thinking を持ち、`<think>` タグの思考テキストが出力に混ざることがある。27 tokens/s のため待ち時間は小さい。
 - `granite4.2` のような推論モデルは、Continue から thinking を止められず1回の応答に約2分かかるため使わない (ADR-0006)。
 - CPU 推論は初回のロードと長いプロンプトの処理に時間がかかる。
   補完モデルは小さく保ち、チャットに渡すコンテキストは絞る。

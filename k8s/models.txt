@@ -1,19 +1,21 @@
 # Ollama に取得するモデル一覧 (1行1モデル、# 始まりはコメント)
-# 2026-10 時点で ollama.com/library にあるもの。中国系モデルは含めない。
+# 2026-10 時点で ollama.com/library にあるもの。
+# 週次の更新ジョブは、この一覧にあるモデルだけを更新する (一覧にないモデルは消さない)。
 
-# チャット / コード生成 (品質重視、IBM, Apache 2.0, 約5GB、約6.5 tokens/s)
+# チャット / コード生成 (メイン、Liquid AI, MoE 総量8.5B・アクティブ約1B、約27 tokens/s)
+lfm2.5:8b
+
+# チャット (質重視、IBM, Apache 2.0, dense 8B、約6.5 tokens/s)
 granite4.1:8b
 
-# チャット (速度重視、IBM, Apache 2.0, 約2GB、約14.6 tokens/s)
-granite4:3b
+# コード補完 (FIM, Alibaba Cloud の Qwen。中華系を許可した判断は ADR-0007)
+qwen2.5-coder:3b
 
-# コード補完 (FIM) 用の軽量モデル (BigCode)
-starcoder2:3b
-
-# 使わない (thinking が既定で有効になり、短い質問でも約2分かかるため):
-# granite4.2:8b   # IBM, 推論モデル。Continue から think を止められない (ADR-0006)
-
-# Worker のメモリに余裕がある場合に有効化する
+# 取得しない (必要になったら有効化する):
+# starcoder2:3b   # BigCode, 補完の旧候補。約19 tokens/s。qwen2.5-coder:3b と比較用
+# granite4:3b     # IBM, 速度重視のチャット。約14.8 tokens/s
+# granite4.2:8b   # IBM, 推論モデル。thinking が既定でオンになり、1回の応答に約2分かかる (ADR-0006)
+# lfm2:24b        # Liquid AI, MoE 総量24B・アクティブ2B。約14GB と推定され、メモリ制限を16Gi以上に上げる必要がある (未検証)
 # gpt-oss:20b     # OpenAI, MoE, 約14GB。メモリ制限を16Gi以上に上げる必要がある。推論モデル
 # gemma4:e4b      # Google, 軽量
 # phi4-mini       # Microsoft, 3.8B, 軽量で速い (2025年世代)
