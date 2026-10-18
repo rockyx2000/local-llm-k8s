@@ -12,9 +12,8 @@ spec:
   project: default
   source:
     repoURL: https://github.com/rockyx2000/local-llm-k8s
-    # リポジトリの既定ブランチを追跡する。
-    # 既定ブランチが main になるまでは feature ブランチを指す点に注意。
-    targetRevision: HEAD
+    # main ブランチを追跡する。変更は PR 経由で main にマージして反映する。
+    targetRevision: main
     path: k8s
   destination:
     server: https://kubernetes.default.svc
