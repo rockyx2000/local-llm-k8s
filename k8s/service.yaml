@@ -3,8 +3,12 @@ kind: Service
 metadata:
   name: ollama
   namespace: llm
+  annotations:
+    # MetalLB のプール (10.0.0.1-10.0.15.254) は範囲が広く、IP を指定しないと
+    # 先頭の 10.0.0.1 など既存機器と衝突しうる。必ず固定 IP を指定する。
+    metallb.universe.tf/loadBalancerIPs: 10.0.1.200
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: ollama
   ports:
