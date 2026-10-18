@@ -1,0 +1,34 @@
+# local-llm-k8s
+
+自宅 Kubernetes クラスタ上で、CPU 推論のローカル LLM (Ollama) を動かすための構成。
+VSCode (Continue 拡張) から OpenAI 互換 / Ollama API で呼び出す。
+
+- 対象環境: Ryzen 7 3700X、GPU なし、Worker VM は 6コア/12スレッド
+- モデル方針: 中国系以外 (IBM Granite、BigCode StarCoder2、OpenAI gpt-oss など)
+
+## 構成
+
+```
+k8s/        Kubernetes マニフェスト (kustomize)
+scripts/    モデル取得スクリプトとモデル一覧
+docs/       クライアント側の設定例
+Makefile    よく使う操作
+```
+
+## 手順
+
+```bash
+make apply     # namespace / PVC / Deployment / Service を作成
+make status    # Pod が Running になるまで待つ
+make models    # scripts/models.txt のモデルを取得
+make forward   # localhost:11434 に転送 (別ターミナルで make test)
+```
+
+VSCode の設定は `docs/vscode-continue.md` を参照。
+
+## 今後の予定
+- Cloudflare Tunnel による外部公開 (Cloudflare Access での認証を併用する)
+
+## 注意
+- Ollama には認証がない。LAN 外へ公開する場合は必ず認証を前段に置く。
+- Secret (トンネルトークン等) は git に含めない。`.gitignore` を参照。
