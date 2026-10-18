@@ -9,7 +9,7 @@
 - 当初提案した `granite4` と `gpt-oss:20b` は最新ではなかった。2026-10 時点で Ollama 公式ライブラリを確認し直した。
 
 ## 決定
-既定の構成は次のとおりとする (`scripts/models.txt`)。
+既定の構成は次のとおりとする (`k8s/models.txt`)。
 
 | 用途 | モデル | 理由 |
 |---|---|---|
@@ -44,4 +44,4 @@ Worker VM: 6 vCPU、CPU タイプ `host` (AVX2 有効)、メモリ 20GiB。Ollam
 - Granite、Gemma、Phi の情報の一部は第三者サイトによる。モデルの存在とサイズは ollama.com/library で確認したが、性能比較は未確認。
 
 ## 結果
-- モデルの追加・変更は `scripts/models.txt` の編集と `make models` で行える。
+- モデルの追加・変更は `k8s/models.txt` の編集と `make models` で行える。

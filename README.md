@@ -20,7 +20,7 @@ Makefile    よく使う操作
 ```bash
 make apply     # namespace / PVC / Deployment / Service を作成
 make status    # Pod が Running になるまで待つ
-make models    # scripts/models.txt のモデルを取得
+make models    # k8s/models.txt のモデルを取得
 make forward   # localhost:11434 に転送 (別ターミナルで make test)
 ```
 
@@ -35,6 +35,12 @@ kubectl apply -f argocd/application.yaml
 ```
 
 kubeconfig は `~/.kube/config-home` (microk8s の master から取得したもの) を使う。
+
+## モデルの更新
+
+`k8s/models.txt` の一覧を、CronJob (`model-updater`) が毎週月曜 03:00 (JST) に再取得して最新に保つ。
+すぐに更新したい場合は `make update-models`。新しい世代へ切り替えるときは `k8s/models.txt` を編集して PR を出す
+(詳細は `docs/adr/0004-model-update-and-gitops.md`)。
 
 ## 今後の予定
 - Cloudflare Tunnel による外部公開 (Cloudflare Access での認証を併用する)
