@@ -28,4 +28,11 @@
   StorageClass は `microk8s-hostpath` (既定、WaitForFirstConsumer)。MetalLB と ingress アドオンが有効。
 - 上記を踏まえ、Pod は `kubernetes.io/hostname: k8s-worker` に固定し、リソースは requests が cpu 3 / memory 8Gi、
   limits が cpu 5 / memory 20Gi とした。他のワークロードを圧迫しないためで、推論スレッド数も 6 を超えない範囲に抑える。
+- 障害の記録 (2026-10-18): 推論テスト中に Worker VM (Proxmox VM 104) が停止した。ホストの `dmesg` に
+  `Out of memory: Killed process (kvm)` があり、ホストの OOM Killer が原因と確定した。
+  ホストの物理メモリは 31GiB で、VM 104 に 30GiB を割り当てており、他の VM と合わせて物理メモリを超えていた。
+  対処として VM 104 を 16GiB に減らし (Ballooning 無効)、Ollama の limits.memory を 10Gi に下げる。
+- 性能上の問題: Proxmox の CPU タイプが `x86-64-v2-AES` で、VM から AVX/AVX2/FMA/F16C が見えていなかった
+  (`/proc/cpuinfo` で確認、sse4_2 まで)。`host` に変更して AVX2 を有効にする。
+- メモリ 16GiB では `gpt-oss:20b` (約14GB) は載らない。使う場合はホストの物理メモリ増設か他 VM の縮小が前提となる。
 - hostpath の PVC は Worker のローカルディスク (空き約 100GB) に作られる。Worker 障害時はモデルの再取得が必要になる。
