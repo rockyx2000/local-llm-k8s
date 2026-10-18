@@ -2,13 +2,15 @@
 # 2026-10 時点で ollama.com/library にあるもの。
 # 週次の更新ジョブは、この一覧にあるモデルだけを更新する (一覧にないモデルは消さない)。
 
-# チャット / コード生成 (メイン、Liquid AI, MoE 総量8.5B・アクティブ約1B、約27 tokens/s)
-lfm2.5:8b
-
-# チャット (質重視、IBM, Apache 2.0, dense 8B、約6.5 tokens/s)
+# チャット / コード生成 (メイン、IBM, Apache 2.0, dense 8B、約6.5 tokens/s)
+# ベンチ (bench/) で、LFM より正確で、回答までの時間の中央値も短かった (ADR-0008)
 granite4.1:8b
 
-# コード補完 (FIM, Alibaba Cloud の Qwen。中華系を許可した判断は ADR-0007)
+# チャット (下書き・雑談用、Liquid AI, MoE 総量8.5B・アクティブ約1B、約27 tokens/s)
+# 出力のバラつきが大きく、壊れたコードを出すことがある。生成コードは必ず読む (ADR-0008)
+lfm2.5:8b
+
+# コード補完 (FIM, Alibaba Cloud の Qwen。中華系を許可した判断は ADR-0007。補完の品質は未評価)
 qwen2.5-coder:3b
 
 # 取得しない (必要になったら有効化する):
