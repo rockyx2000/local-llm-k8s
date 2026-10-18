@@ -1,0 +1,14 @@
+# Ollama に取得するモデル一覧 (1行1モデル、# 始まりはコメント)
+# 2026-10 時点で ollama.com/library にあるもの。中国系モデルは含めない。
+
+# チャット / コード生成 (IBM, Apache 2.0, 約5GB)
+granite4.2:8b
+
+# コード補完 (FIM) 用の軽量モデル (BigCode)
+starcoder2:3b
+
+# Worker のメモリに余裕がある場合に有効化する
+# gpt-oss:20b     # OpenAI, MoE, 約14GB, 16GB 以上のメモリ推奨
+# gemma4:e4b      # Google, 軽量
+# phi4-mini       # Microsoft, 3.8B, 軽量で速い (2025年世代)
+# phi4            # Microsoft, 14B dense, 精度は高いがCPUでは遅め (2025年世代)
