@@ -7,7 +7,8 @@
 | [0003](0003-access-and-exposure.md) | アクセス方法と公開範囲 | 一部置き換え済み (ローカルアクセスは0005に置換、外部公開は保留) |
 | [0004](0004-model-update-and-gitops.md) | モデルの自動更新と GitOps (ArgoCD) による管理 | 採用 |
 | [0005](0005-lan-exposure-via-loadbalancer.md) | LAN 向けの公開に MetalLB の LoadBalancer (固定 IP) を使う | 採用 |
-| [0006](0006-non-thinking-chat-models.md) | チャットモデルを thinking なしのものに変更し、メモリ制限を引き上げる | 採用 |
+| [0006](0006-non-thinking-chat-models.md) | チャットモデルを thinking なしのものに変更し、メモリ制限を引き上げる | 一部置き換え済み (既定のチャットモデルは0007に置換。メモリ制限は有効) |
+| [0007](0007-lfm-main-and-qwen-completion.md) | メインのチャットに LFM2.5、補完に Qwen2.5-Coder を採用する | 採用 (使用感を確認して見直す) |
 
 ## 運用ルール
 - 決定を変える場合は既存のADRを書き換えず、新しいADRを追加して旧ADRのステータスを「置き換え済み」に更新する。
