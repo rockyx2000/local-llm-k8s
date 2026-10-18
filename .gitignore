@@ -4,3 +4,9 @@ secrets/
 .env
 .env.*
 *.token
+
+# ベンチの生成物
+bench/raw_*.txt
+bench/results.json
+bench/old/
+bench/__pycache__/
