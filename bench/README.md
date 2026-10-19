@@ -11,7 +11,7 @@ Ollama 上のモデルに Python の課題を解かせ、生成コードを自�
 ## 使い方
 ```bash
 python3 bench/selftest.py   # 採点自体の検証 (正解は満点、不十分なコードは減点になること)
-python3 -u bench/bench.py   # モデルに課題を投げて採点 (MODELS と SAMPLES を編集または環境変数で指定)
+python3 -u bench/bench.py   # モデルに課題を投げて採点 (環境変数 MODELS をカンマ区切りで、SAMPLES を回数で指定)
 ```
 
 `kubectl` で `llm` namespace の Ollama に接続する。kubeconfig は `~/.kube/config-home` を使う。
