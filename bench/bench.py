@@ -14,7 +14,7 @@ ENV = dict(
     KUBECONFIG=os.path.expanduser("~/.kube/config-home"),
     PATH=os.path.expanduser("~/.local/bin") + ":" + os.environ.get("PATH", ""),
 )
-MODELS = ["lfm2.5:8b", "granite4.1:8b"]
+MODELS = os.environ.get("MODELS", "lfm2.5:8b,granite4.1:8b").split(",")
 SAMPLES = int(os.environ.get("SAMPLES", "2"))
 RUN_TIMEOUT = 480
 ANSI = re.compile(r"\x1b\[[0-9;?]*[a-zA-Z]")

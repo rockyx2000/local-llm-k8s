@@ -18,11 +18,15 @@ models:
     model: granite4.1:8b
     apiBase: http://10.0.1.200:11434
     roles: [chat, edit, apply]
+    defaultCompletionOptions:
+      contextLength: 8192   # サーバー側の OLLAMA_CONTEXT_LENGTH と揃える (ADR-0010)
   - name: LFM2.5 8B (速い下書き用)
     provider: ollama
     model: lfm2.5:8b
     apiBase: http://10.0.1.200:11434
     roles: [chat]
+    defaultCompletionOptions:
+      contextLength: 8192
   - name: Qwen2.5-Coder 3B (補完)
     provider: ollama
     model: qwen2.5-coder:3b
@@ -31,6 +35,8 @@ models:
 ```
 
 ## 補足
+- Ollama の既定のコンテキスト長は 4096 で、超えた分は警告なしに古い部分から切り捨てられる。
+  サーバー側を 8192 にした (ADR-0010)。`contextLength` の設定キーは Continue の公式ドキュメントで確認すること。
 - 普段は `granite4.1:8b` を使う。LFM2.5 は速いが出力のバラつきが大きく、壊れたコードを出すことがあるため、下書きや雑談に限る (ADR-0008)。
 - `lfm2.5:8b` は thinking を持ち、`<think>` タグの思考テキストが出力に混ざることがある。27 tokens/s のため待ち時間は小さい。
 - `granite4.2` のような推論モデルは、Continue から thinking を止められず1回の応答に約2分かかるため使わない (ADR-0006)。

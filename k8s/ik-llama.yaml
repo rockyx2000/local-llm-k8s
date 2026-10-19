@@ -1,0 +1,103 @@
+# 未完成の実験用マニフェスト (kustomization.yaml には含めない。経緯は ADR-0009)。
+# 起動とモデルの読み込みは確認済みだが、Ollama の GGUF には gpt-oss 用のチャットテンプレートがなく、
+# chatml にフォールバックして /v1/chat の出力が壊れる。--chat-template-file での解決が必要。
+# Ollama が取得した GGUF を、ik_llama.cpp の llama-server で読み込んで OpenAI 互換 API で提供する。
+# モデルの取得・更新は従来どおり Ollama (models.txt と週次ジョブ) が行い、こちらは読み取り専用で使う。
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ik-llama
+  namespace: llm
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: ik-llama
+  template:
+    metadata:
+      labels:
+        app: ik-llama
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: k8s-worker
+      containers:
+        - name: llama-server
+          # TODO: 動作確認後に、タグではなくダイジェストで固定する
+          image: ghcr.io/ikawrakow/ik-llama-cpp:cpu-server
+          env:
+            # Ollama のモデル名とタグ。granite4.1:8b は ik_llama.cpp で出力が壊れるため使えない (ADR-0009)
+            - name: MODEL_NAME
+              value: gpt-oss
+            - name: MODEL_TAG
+              value: 20b
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -eu
+              # Ollama のマニフェストから、モデル本体 (GGUF) の blob のダイジェストを取り出す
+              M=/models/models/manifests/registry.ollama.ai/library/${MODEL_NAME}/${MODEL_TAG}
+              D=$(tr '{}' '\n\n' < "$M" | grep 'image.model"' | sed -n 's/.*"digest":"sha256:\([0-9a-f]*\)".*/\1/p')
+              echo "model blob: sha256-$D"
+              # -t は生成用、-tb はプロンプト処理用のスレッド数。-rtr は実行時に重みを並べ替えて高速化する。
+              # --jinja はツール呼び出し (Continue の agent モード、MCP) に必要。
+              # --cache-ram は既定が 8192MiB でコンテナのメモリ上限と並ぶため、OOM を避けて小さくする。
+              exec /app/llama-server \
+                -m "/models/models/blobs/sha256-$D" \
+                --alias "${MODEL_NAME}:${MODEL_TAG}" \
+                --host 0.0.0.0 --port 8080 \
+                -c 8192 -np 1 -fa 1 -rtr -t 4 -tb 6 \
+                --jinja --cache-ram 512
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            failureThreshold: 6
+          resources:
+            # Worker は 6 vCPU のため、Ollama (requests 3) と合わせて requests が 6 を超えるとスケジュールされない。
+            # 実際の負荷は片方ずつなので requests は小さくし、limits で上限を決める。
+            # メモリは gpt-oss:20b (約13GB) + KV キャッシュ。Ollama の requests (8Gi) と合わせて
+            # ノードの割り当て可能量 (約19GiB) を超えないよう requests は 6Gi にする。
+            requests:
+              cpu: "1"
+              memory: 6Gi
+            limits:
+              cpu: "5"
+              memory: 16Gi
+          volumeMounts:
+            - name: models
+              mountPath: /models
+              readOnly: true
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: ollama-models
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ik-llama
+  namespace: llm
+  annotations:
+    # TODO: 10.0.1.201 が未使用であることは未確認。有効化の前に ping と ARP で確認する (ADR-0005)。
+    metallb.universe.tf/loadBalancerIPs: 10.0.1.201
+spec:
+  type: LoadBalancer
+  selector:
+    app: ik-llama
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

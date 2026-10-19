@@ -34,6 +34,8 @@ spec:
               value: "1"          # CPU 推論では並列数を増やすと全体が遅くなる
             - name: OLLAMA_MAX_LOADED_MODELS
               value: "2"          # チャット用 + 補完用の同時ロードを想定
+            - name: OLLAMA_CONTEXT_LENGTH
+              value: "8192"       # 既定の 4096 では、長い会話の古い部分が警告なしに切り捨てられる (ADR-0010)
           readinessProbe:
             httpGet:
               path: /api/version
@@ -52,12 +54,14 @@ spec:
             # Worker VM は 20GiB (ホストの物理メモリは 31GiB)。
             # 8B のチャットモデル (約7GB) と補完モデル (約2.5GB) の同時ロードを想定する。
             # 10Gi では同時ロード時に OOMKilled になった (ADR-0006)。
+            # Worker VM を 26GiB に増設した。gpt-oss:20b (約13.5GB) と granite4.1:8b (約6.9GB) の
+            # 同時ロードが最悪ケースのため、KV キャッシュと余裕を含めて 22Gi にする (ADR-0012)。
             requests:
               cpu: "3"
               memory: 8Gi
             limits:
               cpu: "5"
-              memory: 14Gi
+              memory: 22Gi
           volumeMounts:
             - name: models
               mountPath: /root/.ollama

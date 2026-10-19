@@ -27,6 +27,19 @@ make forward   # (任意) 手元に一時転送したい場合
 
 VSCode の設定は `docs/vscode-continue.md` を参照。
 
+## 放置して実行する (バッチ)
+
+時間のかかる問い合わせは、K8s の Job として投入すれば、PC を閉じても止まらない (`docs/adr/0011-batch-jobs-for-unattended-runs.md`)。
+
+```bash
+scripts/batch.sh submit prompt.txt            # 投入 (モデルは -m、制限時間は -t 時間)
+scripts/batch.sh list                         # 状態の一覧
+scripts/batch.sh result <ID>                  # 結果を表示
+scripts/batch.sh cancel <ID>                  # 取り消し
+```
+
+実行中は Ollama が占有されるため、Continue のチャットも待たされる。
+
 ## ArgoCD による管理
 
 `argocd/application.yaml` を初回のみ手動で適用すると、以降は `k8s/` の変更が自動で反映される。
